@@ -2,6 +2,106 @@
 
 ## Python 基础
 
+### 注解
+
+- **==类型注解==**：`(x: int)`
+
+  - **Java:** `public void func(int x)`  “强制约束”，类型不对编译不通过
+  - **Python:** `def func(x: int):`运行环境（解释器）本身不强制检查，主要是给 **IDE（代码补全）** 和 **静态检查工具（如 MyPy）** 看的。
+
+- **==Annotated==**：`Annotated[A, B]`
+
+  - **需要导入依赖**：`from typing import Annotated`
+
+  - **Java**：类似成员变量 + 自定义注解
+
+    ```java
+    public class MyAgentState {
+        @AddMessages // 假设有一个自定义注解 @AddMessages
+        public List<Object> messages; 
+        
+        public int retry_count;
+    }
+    ```
+
+  - **Python**：`Annotated[A, B]`，例如 `Annotated[list, add_messages]`
+
+    1. **A**: <u>类型声明</u>（告诉 IDE 这是一个列表）。
+    2. **B**: <u>注解</u>、元数据 (Metadata)。它本身不改变变量的性质，但它像一个“隐形的便签”，贴在了这个变量上。
+
+- **==注解与装饰器的区别==**
+
+  - **装饰器 (@decorator)**：是 “行动派”，它会**主动介入**。
+    - 当你给函数加了装饰器，这个函数在运行前就被“偷梁换柱”了。它会改变函数的行为。
+  - **注解 (Annotation / Annotated)**：是“ 标记派”，它很**被动**。
+    - 它只是静静地待在那，等着别人来读取它。如果没人读它，它就是一行废话。
+    - 如果框架（比如 LangGraph）去读它，框架就会根据这个标记执行特定的逻辑
+
+### 数据类型
+
+- **字典（dict）**：键值对（底层是一个哈希表），等价于 Java 的 `HashMap<Object, Object>`。
+
+  - **键的类型**：只要一个对象是“可哈希的”（一旦创建，内容不可变），它就可以做键。
+    - **可以做键的**：字符串 (`str`)、整数 (`int`)、浮点数 (`float`)、元组 (`tuple`)、甚至是 `None`。
+    - **不可以做键的**：列表 (`list`)、字典 (`dict`)，因为它们是可变的。
+  - **键的数量**：可以随时增删，不固定。
+
+  ```py
+  data = {
+      "name": "Alice",
+      "age": 18
+  }
+  ```
+
+- **TypedDict**：带类型约束的字典。
+
+  规定一个 dict 里必须有哪些 key（<u>TypedDict 规定所有的键都是字符串</u>），每个 key 的 value 是什么类型。<u>键的数量是固定的</u>。
+
+  > `TypedDict` 的设计初衷是模拟 Java/C# 中的**对象（Object/POJO）**。 
+  >
+  > 在 Java 中，你访问属性是 `person.name`；在 Python 字典中，对应的是 `person["name"]`。
+  >
+  > 为了让 IDE 知道 `person` 到底有哪些属性，`TypedDict` 规定：
+  >
+  > ① 键必须是**字符串**（就像 Java 的变量名）。
+  >
+  > ② 键的名字必须**预先定义**好。
+
+  ```py
+  from typing import TypedDict
+  
+  # 定义一个“字典结构”
+  class User(TypedDict):  
+      name: str
+      age: int
+      
+  # 创建数据, 数据类型必须符合定义, 且不能缺少字段
+  user = {"name": "Alice", "age": 18}
+  ```
+
+  - **TypedDict 和对象的区别**：
+
+    - TypedDict 本质还是 `dict`，只是 “加了类型说明”，没有方法
+    - 类实例（对象）有属性和方法，可以用点访问
+
+  - **`class` 关键字**：定义一种结构，不一定是类。
+
+    - 定义类（对象模板）：`class User: ...`
+
+    - 定义类型结构（不用于创建对象）：`class User(TypedDict): ...`
+
+      这里不是在造对象，而是在说：“User 这种 dict，必须长这样”
+
+  - **继承**：`class 子类(父类): ...`
+
+    - 不指定父类默认继承 `object`
+
+      > `class User: ...` 等价于 `class User(object): ...`
+
+    - `class User(TypedDict): ...`：表示 `User` 继承 `TypedDict`
+
+      > 在 Python 中，**一切皆对象**。字典（dict）是内置的对象。这里的“继承”只是为了定义这个字典的“形状”（Schema）。
+
 ### LEGB 作用域
 
 - **Python 是动态语言**
