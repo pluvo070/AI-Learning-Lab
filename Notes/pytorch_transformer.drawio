@@ -1,0 +1,324 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.9 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.9">
+  <diagram name="第 1 页" id="Dp3DkK1G9phDJCA4u_Bq">
+    <mxGraphModel dx="2046" dy="801" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tLZtzUbjcKSENESSdSeK-2" value="EncoderDecoder" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="300" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-65" value="init(encoder, decoder, src_embed, tgt_embed, generator)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-2">
+          <mxGeometry y="30" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-93" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="tLZtzUbjcKSENESSdSeK-2" source="tLZtzUbjcKSENESSdSeK-66">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="235.67000000000002" y="150" as="sourcePoint" />
+            <mxPoint x="90.00333333333326" y="45" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="240" y="70" />
+              <mxPoint x="180" y="30" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-3" value="encode(src,src_mask) - memory" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-2">
+          <mxGeometry y="80" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-94" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="tLZtzUbjcKSENESSdSeK-2" source="tLZtzUbjcKSENESSdSeK-95">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="112.22" y="140" as="sourcePoint" />
+            <mxPoint x="89.9977777777776" y="70" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="180" y="220" />
+              <mxPoint x="150" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-4" value="decode(&amp;nbsp;memory, src_mask, tgt, tgt_mas) - 下一个词向量" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-2">
+          <mxGeometry y="110" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-5" value="forward" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-2">
+          <mxGeometry y="150" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-6" value="Generator" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="520" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-95" value="init(模型维度, tgt_vocab)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-6">
+          <mxGeometry y="30" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-7" value="Linear+Softmax" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-6">
+          <mxGeometry y="60" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-10" value="Encoder&lt;div&gt;编码器整体&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="54" y="180" width="160" height="170" as="geometry">
+            <mxRectangle x="210" y="100" width="100" height="40" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-102" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="tLZtzUbjcKSENESSdSeK-10" source="tLZtzUbjcKSENESSdSeK-62">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="182" y="65" as="sourcePoint" />
+            <mxPoint x="86" y="50" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="176" y="30" />
+              <mxPoint x="118" y="30" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-61" value="init(单个编码器layer, 层数N)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-10">
+          <mxGeometry y="40" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-11" value="self.layers 克隆N个编码器" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-10">
+          <mxGeometry y="70" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-12" value="self.norm 一个标准化层" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-10">
+          <mxGeometry y="100" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-13" value="forward: 数据经过N个编码器 - 标准化 - 输出" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-10">
+          <mxGeometry y="130" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-14" value="LayerNorm&lt;div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;子层的层标准化&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="254" y="545" width="156" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-63" value="init(features, eps=1e-6)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-14">
+          <mxGeometry y="40" width="156" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-15" value="forward: 输入数据x - 标准化计算 - 输出" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-14">
+          <mxGeometry y="70" width="156" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-18" value="SublayerConnection&lt;div&gt;子层包装&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="300" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-64" value="init(size, dropout)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-18">
+          <mxGeometry y="40" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-21" value="forward: 输入 - 标准化 -&amp;nbsp;&lt;div&gt;&lt;span style=&quot;color: rgb(51, 51, 51); font-family: &amp;quot;Open Sans&amp;quot;, &amp;quot;Clear Sans&amp;quot;, &amp;quot;Helvetica Neue&amp;quot;, Helvetica, Arial, &amp;quot;Segoe UI Emoji&amp;quot;, sans-serif; orphans: 4; white-space-collapse: preserve; background-color: rgb(255, 255, 255);&quot;&gt;子层计算 - 输出 Dropout - 残差连接&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-18">
+          <mxGeometry y="70" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-118" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="tLZtzUbjcKSENESSdSeK-18" source="tLZtzUbjcKSENESSdSeK-63">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-45" y="306" as="sourcePoint" />
+            <mxPoint x="104" y="86" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="5" y="276" />
+              <mxPoint x="-15" y="126" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-22" value="EncoderLayer&lt;div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;单个编码器(两个子层)&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="254" y="180" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-62" value="init(维度, 自注意力层, FFN层, dropout)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-22">
+          <mxGeometry y="40" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-24" value="forward: 自注意力 - FFN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-22">
+          <mxGeometry y="70" width="150" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-27" value="Decoder&lt;div&gt;解码器整体&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="54" y="380" width="160" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-104" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;exitPerimeter=0;" edge="1" parent="tLZtzUbjcKSENESSdSeK-27" source="tLZtzUbjcKSENESSdSeK-67">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="200" y="55" as="sourcePoint" />
+            <mxPoint x="86" y="50" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="176" y="30" />
+              <mxPoint x="118" y="30" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-66" value="init(单个解码器layer, 层数N)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-27">
+          <mxGeometry y="40" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-28" value="self.layers N个解码器" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-27">
+          <mxGeometry y="70" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-29" value="self.norm 标准化组件" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-27">
+          <mxGeometry y="100" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-30" value="forward: 数据经过N个编码器 - 标准化 - 输出" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-27">
+          <mxGeometry y="130" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-31" value="DecoderLayer&lt;div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;单个解码器(三个子层)&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="254" y="380" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-67" value="init(维度, 自注意力层, 源注意力层, FFN层, dropout)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-31">
+          <mxGeometry y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-32" value="forward: 自注意力 - 源注意力 - FFN" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-31">
+          <mxGeometry y="80" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-33" value="subsequent_mask(维度)&lt;div&gt;遮罩函数&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="600" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-35" value="attention 函数&lt;div&gt;计算缩放点积注意力&lt;/div&gt;&lt;div&gt;(q,k,v矩阵, mask, dropout) - z矩阵&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="710" y="190" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-36" value="MultiHeadedAttention&lt;div&gt;多头注意力层&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="487" y="80" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-68" value="init(头数, 模型维度, dropout)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-36">
+          <mxGeometry y="40" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-37" value="self.linears: 定义4个线性层&lt;div&gt;(参数矩阵W_q/W_k/W_v和最后的输出转换)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-36">
+          <mxGeometry y="70" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-38" value="forward: 传入qkv向量 - 通过线性层变成矩阵QKV - 拆分头批量计算注意力 - 合并拼回 - 线性输出" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-36">
+          <mxGeometry y="120" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-43" value="PositionwiseFeedForward&lt;div&gt;FFN子层&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="450" width="180" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-69" value="init(模型维度, 扩展维度, dropout)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-43">
+          <mxGeometry y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-44" value="forward: 线性升维 - 非线性变换(激活函数ReLU) - dropout - 线性降维" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-43">
+          <mxGeometry y="80" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-47" value="Embeddings 嵌入层" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="5" y="640" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-70" value="init(模型维度, 词典大小)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-47">
+          <mxGeometry y="30" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-48" value="forward: token - 向量" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-47">
+          <mxGeometry y="60" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-51" value="PositionalEncoding&lt;div&gt;位置编码&lt;/div&gt;" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="5" y="750" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-71" value="init(维度, dropout, max_len)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-51">
+          <mxGeometry y="40" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-52" value="forward: 将位置编码加到 Embedding 向量上&lt;div&gt;(让模型能知道单词的顺序)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="tLZtzUbjcKSENESSdSeK-51">
+          <mxGeometry y="70" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-73" value="make_model&lt;div&gt;创建模型&lt;/div&gt;&lt;div style=&quot;orphans: 4; text-align: left;&quot;&gt;return EncoderDecoder&lt;/div&gt;&lt;div style=&quot;orphans: 4; text-align: left;&quot;&gt;(src_vocab, tgt_vocab, 堆叠个数N, 维度&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;, FFN维度, 头数, dropout)&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-230" y="185" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-92" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-61">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="54" y="240" as="sourcePoint" />
+            <mxPoint x="-150.0010344827586" y="345" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-90" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-97" value="nn.Sequential&lt;div&gt;(Embeddings(d_model, src_vocab), c(position))&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="655" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-98" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-70">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-10" y="620" as="sourcePoint" />
+            <mxPoint x="-90" y="680" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-30" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-99" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-71">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-100" y="805" as="sourcePoint" />
+            <mxPoint x="-112.94117647058829" y="700" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-50" y="805" />
+              <mxPoint x="-100" y="755" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-100" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#f5f5f5;strokeColor=#666666;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-97">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-250" y="640" as="sourcePoint" />
+            <mxPoint x="-190" y="370" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-240" y="630" />
+              <mxPoint x="-240" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-107" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.485;exitY=0.998;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#ffe6cc;strokeColor=#d79b00;curved=1;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-38" target="tLZtzUbjcKSENESSdSeK-18">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="350" as="sourcePoint" />
+            <mxPoint x="450" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="570" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-108" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.521;entryY=0.996;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;curved=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-43" target="tLZtzUbjcKSENESSdSeK-21">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="350" as="sourcePoint" />
+            <mxPoint x="450" y="300" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="570" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-109" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;curved=1;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-18">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="490" y="300" as="sourcePoint" />
+            <mxPoint x="359" y="235" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="450" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-110" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.605;entryY=0.112;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-18" target="tLZtzUbjcKSENESSdSeK-67">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="470" as="sourcePoint" />
+            <mxPoint x="350" y="420" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="380" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-111" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.605;entryY=0.112;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="535" y="299" as="sourcePoint" />
+            <mxPoint x="390" y="434" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="380" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-112" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.913;entryY=0.019;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="535" y="420" as="sourcePoint" />
+            <mxPoint x="390.95000000000005" y="230.00000000000006" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="370" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-113" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.401;entryY=-0.089;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="540" y="420" as="sourcePoint" />
+            <mxPoint x="317.1600000000001" y="452.44000000000005" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="490" y="450" />
+              <mxPoint x="400" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-115" value="" style="curved=1;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1" source="tLZtzUbjcKSENESSdSeK-63">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="247" y="595" as="sourcePoint" />
+            <mxPoint x="103" y="540" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="123" y="595" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tLZtzUbjcKSENESSdSeK-116" value="" style="curved=1;endArrow=classic;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;entryX=0.316;entryY=0.927;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="tLZtzUbjcKSENESSdSeK-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="600" as="sourcePoint" />
+            <mxPoint x="120" y="555" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="40" y="620" />
+              <mxPoint y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
