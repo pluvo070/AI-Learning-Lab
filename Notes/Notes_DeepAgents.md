@@ -43,7 +43,7 @@
 - **进入项目目录，安装依赖**
 
   ```bash
-  cd /d PATH # 切换到D盘的工作目录
+  cd /d D:\Code\LLM\Exercises\weather_news_agent # 切换到D盘的工作目录
   pip list # 查看所有依赖
   pip install deepagents langchain-deepseek python-dotenv # 安装所需依赖
   pip list --format=freeze > requirements.txt # 导出依赖列表
@@ -58,11 +58,21 @@
 - **启动 IDE**：
 
   - **命令行启动**：如果你安装了 Cursor 的命令行工具，你可以输入 `cursor .`
-  - **手动打开**：先打开 Cursor，然后点击 `File -> Open Folder` 选择你的项目目录
+  
   - **选择环境【重要】**： 打开 Cursor 后，你必须告诉它使用你刚创建的 Conda 环境，否则代码会报错（找不到 `deepagents`）。
+    
     - 快捷键：`Ctrl + Shift + P`
     - 输入：`Python: Select Interpreter`
     - 在列表中找到：`Python 3.12 ('py312-deepagents-202604': conda)`
+    
+    > 每次打开 IDE 都需要确认环境，但是不需要每次打开 IDE 都再开 Anaconda CLI。
+    >
+    > 什么时候需要再次手动 `conda activate`：
+    >
+    > - 在终端里手动跑 Python / pip / 脚本：`python xxx.py`
+    > - 用命令行执行：`pip install xxx`
+  
+  
 
 ## 使用模型
 
@@ -247,7 +257,10 @@ agent = create_deep_agent(
 
 ### 系统提示 `system_prompt` 
 
-> Deep Agents 自带一个系统提示。默认系统提示包含使用内置规划工具、文件系统工具和子代理的详细说明。当中间件添加特殊工具，比如文件系统工具时，会将其附加到系统提示符中。
+- 系统提示是启动 Agent 时最顶层的指令（通常由框架自动生成或用户注入）。
+  - <u>用于定义 AI 的角色身份</u>，例如 “你是一个冷酷的机器人” 或 “你是一个热情的导游”。
+  - 它太宏观了。如果你在 System Prompt 里写太细的工具使用逻辑，模型容易遗忘。
+- Agent 有一个默认系统提示，其中包含使用内置规划工具、文件系统工具和子代理的详细说明。当中间件添加特殊工具，比如文件系统工具时，会将其附加到系统提示符中。
 
 ```py
 research_instructions = """\
@@ -495,6 +508,8 @@ agent = create_deep_agent(
   - **复杂自省**：你需要 Agent 在回答后，自己跳到一个“反思节点”检查自己的错误，如果错了就打回去重写。
 
 
+
+## 中间件与子代理
 
 ### 中间件 `middleware` 
 
@@ -1034,7 +1049,6 @@ agent = create_deep_agent(
   - **被动读取**：LLM 决策 → 调用 Tool → Tool 执行读取
   - **主动读取**：新对话开始 → 在交给 LLM 思考之前，先去 Store 里 “捞一下”
 
-  
 
 #### 完整记忆流程
 
@@ -1051,9 +1065,20 @@ agent = create_deep_agent(
 
 <img src="deepagents_memory.png" alt="deepagents_memory" style="zoom:33%;" />
 
+
+
+## 后端与沙盒
+
+| **后端类型**           | **物理本质**              | **适用场景**                                                 |
+| ---------------------- | ------------------------- | ------------------------------------------------------------ |
+| **StateBackend**       | **内存虚拟盘**            | **教学与演示**。速度极快，不花钱，但程序一关，里面的文件和记忆全丢。 |
+| **StoreBackend**       | **持久化数据库/对象存储** | **轻量级生产**。能存住长期记忆和 Skills，但由于没有真实的 CPU，它**不能真跑代码**，只能存取数据。 |
+| **复合型 (Composite)** | **混合动力**              | **复杂业务**。用数据库存长期记忆，用沙盒跑代码。把“脑子”和“手”分别接在最适合的地方。 |
+| **远程沙箱 (Remote)**  | **云端全功能计算机**      | **重型 Agent**。比如 Modal, Runloop。它既能存文件，又能安装环境，还能高强度跑任务。 |
+
 ### 后端 `Backends`
 
-- **作用**：指定会话持久化与跨会话记忆的存储位置。解决问题：“当 Graph 运行完一次后，里面的数据去哪了？”
+- **作用**：提供一个 <u>**Agent 的执行环境**</u>，指定跨会话记忆的存储位置。解决问题：“当 Graph 运行完一次后，里面的数据去哪了？”
 
   这就是 `State`、`Store` 和 `Checkpointer` 出现的地方，它们被包裹在 `Backend` 这个参数里。
 
@@ -1086,15 +1111,11 @@ agent = create_deep_agent(
 
   > 处理用户的临时上传，例如用户传了一个 PDF 让 AI 总结，总结完就不用管了。
 
-- **底层原理**：
+- **底层原理**：它是一个**虚拟文件系统**
 
-  - 存储的是整个 **State 对象**（包含当前所有变量：messages, count, user_info 等）。
-  - **读写逻辑**：每次用户说话，它就去内存里把 State 拿出来，跑完节点再整个存回去。
-  - 它是图运行的**基础设施**。只要你运行智能体，它就会：
-    1. **自动读取**：根据当前的 `thread_id` 从内存加载历史
-    2. **自动更新**：节点运行完后，自动把最新的消息存进内存
-    3. 不需要在节点里写代码去存
-  
+  - 它没有 Store 对象，只能通过 Agent 调用 `read_file` 等工具读取。
+  - 它内部自带了一个简单的 Python 字典（Dict）来模拟文件系统。你给它文件，它就直接存进自己的变量里，不依赖任何外部存储协议。
+
 - **示例**：
 
   ```py
@@ -1191,6 +1212,8 @@ agent = create_deep_agent(
     >
     > 如果你想让 AI 帮你整理硬盘里的 PDF，允许 AI 真实地重命名、移动或编辑文件，那么就用 `virtual_mode=False`
 
+
+
 #### LocalShellBackend
 
 - **适用场景**：交互式调试，让你手动输入或查看当前的记忆状态。让 AI 直接操作你的电脑（高风险）
@@ -1209,6 +1232,8 @@ agent = create_deep_agent(
 
   > `env={"PATH": "/usr/bin:/bin"}`：环境变量，系统去哪里找命令
 
+
+
 #### StoreBackend
 
 - **适用场景**：生产环境。多用户、大数据量、需要长期稳定记忆的应用。
@@ -1216,9 +1241,18 @@ agent = create_deep_agent(
   - **语义搜索**：Store 支持向量搜索（如果配置了 Embedding），这是 State 做不到的。
   - `StoreBackend` ：是一个“接口”，它会自动寻找全局对象 `store` 来执行真正的读写操作。
   
+  ```py
+  agent = create_deep_agent(
+      backend=StoreBackend(), # 指定后端类型
+      store=InMemoryStore() 	# 传入物理位置
+  )
+  ```
+  
+  
+  
 - **==存在内存==**：`store = InMemoryStore()`
 
-  > `InMemoryStore()` 是一个小型内存数据库，索引是 `(namespace, key)`。
+  > **`InMemoryStore` ** 是一个符合 `LangGraph` 标准的键值对存储接口。虽然它现在在“内存”里，但它的 API（`.put`, `.get`）和真正的数据库（如 Redis 或数据库持久化存储）是一模一样的，可以理解为是一个<u>小型内存数据库</u>。
 
   ```py
   from langgraph.store.memory import InMemoryStore # 用于内存中存数据
@@ -1234,7 +1268,7 @@ agent = create_deep_agent(
   )
   ```
 
-- **==存储到数据库==**：例如 `store = PostgresStore(conn_pool)`
+- **==存储到数据库==**：`store = PostgresStore(conn_pool)`
 
   （这里使用 PostgreSQL，需先安装 `langgraph-checkpoint-postgres`
 
@@ -1244,10 +1278,10 @@ agent = create_deep_agent(
   
   # 1. 建立数据库连接池
   DB_URI = "postgresql://user:password@localhost:5432/dbname"
-  pool = ConnectionPool(conninfo=DB_URI)
+  conn_pool = ConnectionPool(conninfo=DB_URI)
   
   # 2. 使用 PostgresStore 作为 store
-  store = PostgresStore(pool)
+  store = PostgresStore(conn_pool)
   
   # 3. 确保表结构已创建（通常在程序启动时执行一次）
   store.setup()
@@ -1257,7 +1291,7 @@ agent = create_deep_agent(
       backend=StoreBackend(
           namespace=lambda ctx: (ctx.runtime.context.user_id,),
       ),
-      store=store  # 现在数据会写入数据库
+      store=store  # 配置后端物理位置在哪，即数据库
   )
   ```
 
@@ -1357,9 +1391,53 @@ agent = create_deep_agent(
 
      3. **重定向**：调度中心说：“这个地址归 `StoreBackend` 管”，然后把数据包转发给它
 
+### 使用 Checkpointer 还是后端
+
+#### 使用 Checkpointer 
+
+- **作用**：手动传入 `checkpointer`，是给 Agent 接了一块 “**录音磁带**”，Agent 会把你们的对话存进去（仅当前会话）。
+
+- **必须手动创建**：<u>如果不提供 checkpointer，系统就认为这个 Agent 不需要会话记忆</u>。
+
+  - Agent 自动管理图，即自动管理 state 对象，而 checkpointer 的作用是把 state 的数据存到后端，你需要使用这个存储的功能就需要手动创建它。
+
+  - 手动创建 `checkpointer` 实际上是开发者在声明：**“**我拥有这块记忆的管理权，我待会要用 `thread_id` 来操作它。”
+
+  ```py
+  from langgraph.checkpoint.memory import MemorySaver
+  checkpointer = MemorySaver() # 决定checkpointer把state存储到哪里
+  agent = create_deep_agent(
+      model="openai:gpt-5.4",
+      skills=["/skills/"],
+      checkpointer=checkpointer,
+      # 未指定后端则默认使用一个Statebackend
+  )
+  ```
+
+- **存储到了哪里**：checkpointer 会把 state 对象数据存储到 <u>创建 checkpointer 的时候指定的位置</u>，而不是创建 Agent 时候指定的后端。
+
+  > 上例中：`checkpointer = MemorySaver()` 决定了checkpointer 把 state 存到内存。
+  >
+  > 如果换成 `checkpointer = PostgresSaver(conn)`，就变成了存到数据库。
+
+- **给 checkpointer 而不给 backend**：Agent 只能 “聊天” 并记住对话记录（checkpointer 记忆的归宿），没法 “写文件” 或 “运行代码”（Backend 干活的环境）。
+
+#### 使用后端
+
+- **作用**：给 Agent 创造一个 “**虚拟的 U 盘**”，它直接在当前的 Python 进程里模拟出一个文件系统。
+
+  在这个文件系统里，无论是你喂给它的技能（Skills）、它自己总结的长期记忆、还是它亲手写下的代码，都拥有了实体的承载。
+
+- Agent “读取技能”的行为，实际上是从这个虚拟后端里读取文件，这些文件就 “挂载” 在这个指定的后端里。
+
+```py
+```
+
+
+
 ### 典型后端配置
 
-短期记忆 + 长期记忆 + 动态脚本配置
+**<u>短期记忆 + 长期记忆 + 动态脚本配置</u>**
 
 | **存储类型**      | **对应后端**   | **路径挂载点 (示例)**    | **核心用途**                                |
 | ----------------- | -------------- | ------------------------ | ------------------------------------------- |
@@ -1459,89 +1537,787 @@ agent = create_deep_agent(
     - **CompositeBackend = 路由器**：它并不直接操作存储，但它负责把带有 `/memories/` 的请求重定向给拥有 `store` 访问权限的 `StoreBackend`。
   - 你定义的工具函数（如 `save_user_preference`）中声明了 `store: BaseStore` 参数，框架会自动把这个 `store` 注入进去。
 
+
+
+### 沙盒 Sandbox
+
+- **作用**：让 Agent 在隔离的环境中拥有自己的文件系统和 shell 工具
+
+- **使用场景**：希望 Agent 写入文件、安装依赖和运行命令而不更改本地机器时 
+
+  - 如果你想让 Agent 拥有 **“手”**，去改代码、跑测试，你选 **Modal** 或 **Runloop**。
+
+  - 如果你想让这双“手”在任何地方都好用，你用 **Daytona** 管理环境。
+  - 如果你想让这双“手”工作得透明、可追踪，你必须接入 **LangSmith**。
+
+- **为什么不用原生 Docker 或云服务器**：
+
+  | **维度**     | **原生 Docker / 云服务器** | **专业沙箱后端 (Modal/Runloop/Daytona)**            |
+  | ------------ | -------------------------- | --------------------------------------------------- |
+  | **启动速度** | 较慢，且管理复杂           | **极快**，API 一键生成                              |
+  | **通信成本** | 需自己写 SSH/Socket 逻辑   | **原生 API 支持**，Agent 像调函数一样调系统         |
+  | **隔离级别** | 基础隔离，容易互相干扰     | **强隔离**，每个 Agent 都有独立的文件系统和进程空间 |
+  | **可观测性** | 需自己装监控软件           | **内置监控（LangSmith 对接）**，每行命令都有日志    |
+
+  
+
+#### Modal（快速单次运行）
+
+- **本质**：<u>让 “本地函数” 运行在云端，用于快速运行 AI 计算任务</u>。
+
+  - 当你运行 Modal 代码时，代码会被瞬间打包，发送到 Modal 的服务器集群中，在几秒钟内拉起一个容器执行。
+  - 它通常是 **无状态** 的（Task 结束就没了）。侧重于输入 → 处理 → 输出。
+
+  - 这个沙箱是有 **IP 地址** 和 **文件系统** 的。Agent 在里面执行的操作，都是真实发生在那台云端机器上的。
+
+- **沙盒特点**：非常底层，需要自定义环境。适用于：<u>图像生成、重型数据处理</u>。
+
+- **==让 Agent 使用 Modal 沙箱==**
+
+  ```
+  pip install langchain-modal
+  ```
+
+  ```py
+  import modal  # 导入modal库，用于管理远程运行环境（类似云函数/容器）
+  from deepagents import create_deep_agent  
+  from langchain_anthropic import ChatAnthropic  # 用于调用Claude模型
+  from langchain_modal import ModalSandbox  # 导入Modal沙箱封装，用于在Modal环境中执行代码
+  
+  # Agent连上云端，查找名为"your-app"的Modal应用蓝图（必须提前创建好）
+  # 这个蓝图里规定了用什么系统、装了什么软件
+  app = modal.App.lookup("your-app")
+  
+  # Modal根据蓝图，在云端真实地创建了一台微型虚拟机（容器，沙箱环境）。
+  modal_sandbox = modal.Sandbox.create(app=app)
+  
+  # 框架把这台“云端虚拟机”（Modal沙箱）包装成统一接口（backend），供Agent调用
+  modal_backend = ModalSandbox(sandbox=modal_sandbox)
+  
+  # 创建一个agent
+  agent = create_deep_agent(
+      model=ChatAnthropic(model="claude-sonnet-4-6"),
+      system_prompt="You are a Python coding assistant with sandbox access.", 
+      backend=modal_backend,  # 指定代码执行环境为Modal沙箱
+  )
+  
+  try:  # 调用agent执行任务
+      result = agent.invoke(
+          {
+              "messages": [  # 输入对话消息列表
+                  {
+                      "role": "user",  # 用户角色
+                      "content": "Create a small Python package and run pytest",  # 用户消息：创建Python包并运行测试
+                  }
+              ]
+          }
+      )
+  finally:  # 无论是否出错，最后都关闭沙箱，释放资源
+      modal_sandbox.terminate()
+  ```
+
+- **==创建 Modal 应用==**：
+
+  - **方式 1：在代码中实时定义（最常用）**
+
+    这是你开发 Agent 时最常见的写法。你不需要去网页上点点画画，直接在 Python 文件里写：
+
+    ```py
+    import modal
+    
+    # 1. 定义环境（镜像）:比如你需要这个沙箱里自带 pandas 和 pytest
+    image = modal.Image.debian_slim().pip_install("pandas", "pytest")
+    
+    # 2. 创建 App 对象: 这里的 "my-agent-app" 就是你之后 lookup 时要用的名字
+    app = modal.App("my-agent-app", image=image)
+    
+    # 3. 如果你想把这个 App 部署到云端，让它持久存在
+    # 在终端运行：modal deploy your_script.py
+    ```
+
+  - **方式 2：在终端（CLI）提前部署**
+
+    当你运行 `modal deploy` 后，Modal 会在云端注册这个 `App`。
+
+    一旦部署成功，你的 Agent 代码就可以通过： `app = modal.App.lookup("my-agent-app")` 随时随地“召唤”这个云端环境，而不需要在 Agent 代码里重新定义镜像。
+
+  - **查看我的 Modal 云服务**：[modal.com](https://modal.com)
+
+    当你使用 `modal deploy` 部署后，它就不再依赖你的本地电脑。
+
+    登录 Modal 官网后台，你会看到一个 **"Apps"** 标签页，在这里可以看到所有部署好的 **Apps** 蓝图、正在运行的 **Sandboxes**（沙箱）以及实时日志（Logs）。
+
+
+
+#### Runloop（持久环境）
+
+- **本质**：它是一个**持久化的完整的 Linux 环境**，预装了各种开发工具（Python, Git, Docker, Node.js 等）。
+
+  - **持久性**：它解决了 “断电丢失” 的问题。如果你在 Runloop 开启了一个环境，Agent 在里面写了一半的代码，即便对话断了，下次连接时那个环境还在，文件也还在。
+
+    > 普通的沙盒往往运行完一段代码就自毁了。而 Runloop 认为，Agent 需要一个**持久的、可以反复进入**的 “办公桌”。哪怕 Agent 思考了 1 分钟再回来，桌上的文件和运行中的进程依然在那里。
+
+  - **适用于**：<u>AI 程序员、自动化运维、长期运行的任务</u>。
+
+  - **创建**：调用 `client.devbox.create()` 时，系统会在几秒钟内在 Runloop 的云端集群里拉起一个轻量级的虚拟机。
+
+  - **Runloop 的管理页面**： [runloop.ai](https://runloop.ai) 
+
+- **使用 Runloop 沙箱**
+
+  ```
+  pip install langchain-runloop
+  ```
+
+  ```py
+  import os  
+  from deepagents import create_deep_agent  
+  from langchain_anthropic import ChatAnthropic  # 用于调用Claude模型
+  from langchain_runloop import RunloopSandbox  # 导入Runloop沙箱，用于在隔离环境中执行代码
+  from runloop_api_client import RunloopSDK  # 导入Runloop SDK客户端，用于与Runloop服务通信
+  
+  # 创建Runloop客户端，通过环境变量里的API Key向Runloop服务器发起身份验证
+  client = RunloopSDK(bearer_token=os.environ["RUNLOOP_API_KEY"])
+  
+  # 创建一个云端的开发环境（Runloop的云端准备好了一台Linux环境）
+  devbox = client.devbox.create()
+  
+  # 创建一个沙箱执行环境，供Agent使用
+  runloop_backend = RunloopSandbox(devbox=devbox)
+  
+  # 创建一个agent
+  agent = create_deep_agent(
+      model=ChatAnthropic(model="claude-sonnet-4-6"),  
+      system_prompt="You are a Python coding assistant with sandbox access.", 
+      backend=runloop_backend,  # 指定runloop沙箱后端为代码执行环境
+  )
+  
+  try:   # 调用agent执行任务
+      result = agent.invoke(
+          {
+              "messages": [  
+                  {
+                      "role": "user",  # 表示这是用户输入
+                      "content": "Create a small Python package and run pytest",  # 让agent创建Python包并运行测试
+                  }
+              ]
+          }
+      )
+  finally:   # 无论是否出错，最后都关闭远程开发环境，避免资源泄漏
+      devbox.shutdown()
+  ```
+
+  
+
+#### Daytona（标准化环境）
+
+- **本质**：一个开源的 **标准化开发环境（SDE）管理平台**。
+
+  - **标准样板房**：确保每个 Agent 的办公环境配置都整齐划一，方便大规模部署。
+
+    它是跨平台的。不管是在你的笔记本上，还是在 Azure 上，Agent 面对的环境都是一模一样的（DevContainer 标准）。
+
+  - **可云也可本地部署**：可以把 Daytona 部署在自己的阿里云、腾讯云甚至公司机房内网里，Daytona 都能一键拉起一个符合 VS Code 标准的开发环境。
+  - **持久化**：Agent 下班了（进程结束），`sandbox.stop()` 只是关机。下次 `Daytona().create()`，之前写的代码、下载的 npm 包都还在那个 Volume（卷）里。
+
+- **控制台**：
+
+  - **本地版**：在本地运行 `daytona server`，浏览器打开 `localhost:3000` 就能看到。
+  - **云端版**：访问 [daytona.io](https://www.daytona.io) 登录 Dashboard。
+
+- **为什么需要 Daytona？**
+
+  1. **环境对齐**：Agent 在沙盒里跑代码的环境，可以和你电脑上的 VS Code 环境完全一模一样（通过 `devcontainer.json`）。
+  2. **安全性**：企业不敢把代码发到外部云（Modal/Runloop）。Daytona 允许企业在自己的内网里起沙箱，数据不出库。
+  3. **多并发**：它支持 Agent “开分身”。一个 Agent 遇到难题，可以瞬间克隆（Fork）出 10 个一模一样的环境去尝试 10 种修复方案。
+
+- **使用 Daytona**
+
+  ```
+  pip install langchain-runloop
+  ```
+
+  ```py
+  from daytona import Daytona  # 导入Daytona客户端，用于创建远程开发环境
+  from deepagents import create_deep_agent  
+  from langchain_anthropic import ChatAnthropic  
+  from langchain_daytona import DaytonaSandbox  # 导入Daytona沙箱封装，用于执行代码
+  
+  # 创建一个Daytona沙箱环境（远程隔离运行环境）
+  sandbox = Daytona().create()
+  # Daytona() 会根据你的本地配置（通常是 ~/.daytona/config）自动寻找连接目标。如果你已经登录了云端，它就连云端。
+  
+  # 将Daytona沙箱包装成统一接口，供agent使用
+  backend = DaytonaSandbox(sandbox=sandbox)
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model=ChatAnthropic(model="claude-sonnet-4-6"),  
+      system_prompt="You are a Python coding assistant with sandbox access.", 
+      backend=backend,  # 指定代码执行环境（Daytona沙箱）
+  )
+  
+  try:  # 调用agent执行任务
+      result = agent.invoke(
+          {
+              "messages": [  
+                  {
+                      "role": "user", 
+                      "content": "Create a small Python package and run pytest", 
+                  }
+              ]
+          }
+      )
+  finally:   # 无论是否报错，最后都关闭沙箱，释放资源（避免占用/计费）
+      sandbox.stop()
+  ```
+
+- **Daytona 的部署**：由本地配置决定部署在哪里
+
+  当运行 `pip install daytona` 并执行 `daytona profile set` 时，你在本地电脑上指定了连接目标。
+
+  - 如果你指向 `localhost`，`Daytona().create()` 就在你本地的 Docker 里开沙箱。
+  - 如果你指向你的 **私有云服务器 IP**，它就在那台服务器上开沙箱。
+  - 如果你指向 **Daytona Cloud**，它就在官方的云端开沙箱。
+
+  对 Agent 代码来说，它只管调用 `.create()`，至于这台“电脑”是在哪里，Agent 并不感知。
+
+  
+
+#### LangSmith（监控+沙箱）
+
+- **本质**：[LangSmith](https://smith.langchain.com/)
+
+  - **调试监视器（Observability/Tracing）**：它记录 Agent 思考的每一步、每一个工具调用、花了多少钱、哪里报错了。
+
+    你可以在 LangSmith 里回溯 Agent 在 Modal 或 Runloop 里执行的每一个细节。
+
+  - **沙盒（Sandboxing）** ：这是它后来推出的功能。它提供一个**原生集成**的隔离环境来运行 Agent 的代码。
+
+    - **无缝追踪 (Deep Integration)**： 当 Agent 在 LangSmith 沙盒里运行代码时，代码的 Stdout（标准输出）、Stderr（报错信息） 会自动出现在 LangSmith 的 Trace 图表 中。你不需要手动写任何日志代码，监控和执行是合二为一的。
+    - **从追踪到测试的闭环**： 如果在沙盒里运行失败了，你可以直接在 LangSmith 网页上把这个失败案例点击 “添加到测试集（Dataset）”，以后每次修改代码都能自动跑一遍这个测试。
+
+- **使用 LangSmith**
+
+  ```
+  pip install "langsmith[sandbox]"
+  ```
+
+  ```py
+  from deepagents import create_deep_agent  
+  from langchain_anthropic import ChatAnthropic 
+  from deepagents.backends import LangSmithSandbox  # 导入LangSmith沙箱封装
+  from langsmith.sandbox import SandboxClient  # 导入LangSmith沙箱客户端，用于创建/管理沙箱
+  
+  # 创建LangSmith沙箱客户端（用于和LangSmith服务通信）
+  # 通过你配置的LANGSMITH_API_KEY连接到LangSmith的云端服务器
+  client = SandboxClient()
+  
+  # 远程创建一个沙箱环境，基于指定模板
+  # my-template是你提前在LangSmith后台定义的“镜像”
+  ls_sandbox = client.create_sandbox(template_name="my-template")
+  
+  # 将LangSmith沙箱包装成统一接口，供agent执行代码 
+  backend = LangSmithSandbox(sandbox=ls_sandbox)
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model=ChatAnthropic(model="claude-sonnet-4-6"), 
+      system_prompt="You are a Python coding assistant with sandbox access.",  
+      backend=backend,  # 指定代码执行环境（LangSmith沙箱）
+  )
+  
+  try:# 调用agent执行任务（invoke是统一入口方法）
+      result = agent.invoke(
+          {
+              "messages": [ 
+                  {
+                      "role": "user",
+                      "content": "Create a small Python package and run pytest",
+                  }
+              ]
+          }
+      )
+  finally: # 删除沙箱（根据名称删除），释放资源 
+      client.delete_sandbox(ls_sandbox.name)
+  ```
+
+
+
+## skills 和 memory
+
+### `skills` 参数
+
+- **Skill（SKILL.md）**：是对 Tool 的高级封装和逻辑指导。
+  - 用于告诉 Agent “作为一名员工，你应该如何**组合**使用你的设备”。
+  - 专注于**任务逻辑、风格和边界**。
+  - **为什么要在这里约束？**：
+    - 因为一个 Tool 往往是通用的（如搜索），而 Skill 是具体的（如 “气象分析技能”）。
+    - 在 Skill 里，你可以写：“当执行天气查询时，必须先查时间，再查天气，最后输出 5 天预报。”
+  - **区别**：Tool 说明是 **“怎么开关灯”**，Skill 是 **“什么时候该开灯，以及开灯后要看什么”**。
+
+#### Statebackend
+
+从网络下载 Skills 文件并使用
+
+- **指定文件方式**：
+
+  1. `create_deep_agent` 中用 `skills` 参数指定技能目录路径：定义 Agent 的“视野范围”
+
+     > 告诉 Agent：“去你的仓库管理系统里查看以 `/skills/` 开头的所有记录，那些是你的技能。”
+     >
+     > 它在逻辑上激活了 Agent 扫描该目录的权限。
+
+  2. 运行时通过 `agent.invoke()` 注入具体文件：提供“物理实体”
+
+     > 在调用（Invoke）时传入的 `files`，是真真实实地在内存文件系统里**创建**了这个文件。
+
+- **Agent 是怎么找到技能的？**
+
+  1. **启动**：Agent 接收到任务
+  2. **检查配置**：Agent 发现配置了 `skills=["/skills/"]`
+  3. **扫描动作**：Agent 尝试去访问后端（Backend）的 `/skills/` 路径
+  4. **物理匹配**：如果此时后端（通过你传入的 `files`）刚好在 `/skills/langgraph-docs/SKILL.md` 有数据，Agent 就能顺利读到
+  5. **如果路径不匹配**：如果你在 `skills` 里写了 `/skills/`，但在 `files` 里把文件存在了 `/temp/SKILL.md`，Agent 就会因为“找不到手册”而罢工
+
+  ```py
+  from deepagents import create_deep_agent  
+  from urllib.request import urlopen  # 用于从网络下载文件内容（HTTP请求）
+  from deepagents.backends.utils import create_file_data  # 导入工具函数，用于把文件内容转换为agent可识别的数据结构
+  from langgraph.checkpoint.memory import MemorySaver  # 导入内存型checkpoint，用于保存对话/状态
+  
+  # 创建一个内存型checkpoint，用于保存agent的执行状态（例如对话上下文）
+  checkpointer = MemorySaver()
+  
+  # 定义技能文件的URL地址（远程的SKILL.md文件） 
+  skill_url = "https://raw.githubusercontent.com/langchain-ai/deepagents/refs/heads/main/libs/cli/examples/skills/langgraph-docs/SKILL.md"
+  
+  # 从远程下载技能文件内容
+  with urlopen(skill_url) as response:  # 发起HTTP请求获取文件
+      skill_content = response.read().decode('utf-8') # 读取并转成字符串
+  
+  # 构造文件：一个键值对，包括路径 + 内容
+  skills_files = { 	
+      "/skills/langgraph-docs/SKILL.md": create_file_data(skill_content)  
+  }
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model="openai:gpt-5.4",  
+      skills=["/skills/"],  # 指定技能目录
+      checkpointer=checkpointer,  # 指定状态保存机制（MemorySaver）
+  )
+  
+  # 调用agent执行任务
+  result = agent.invoke(
+      {
+          "messages": [  # 输入对话消息
+              {
+                  "role": "user",  # 用户角色
+                  "content": "What is langgraph?",  # 提问
+              }
+          ],
+          "files": skills_files  # 传入文件内容
+      },
+      config={
+          "configurable": {
+              "thread_id": "12345"  # 指定会话ID，用于区分不同对话（checkpointer）
+          }
+      },
+  )
+  ```
+
+  - **文件挂载**：通过网络下载的 `skills_files` 并将这些文本包装成虚拟文件。由于你没有指定 `backend`，`create_deep_agent` 自动在内存中启动了一个 `StateBackend`，并将这些文件“塞”了进去。
+  - **记忆**：提供一个存在 `MemorySaver()` 的 checkpointer，在内存里开辟了一块空间，让 Agent 记得对话记录。
+  - **生命周期**： Checkpointer（对话存档） 和 StateBackend（执行环境） 都在内存里：
+    - **程序运行时**：它表现得像个专业的 AI 助手，懂技能、记历史。
+    - **程序关闭后**：所有的技能文件、聊天记录、生成的临时数据全部消失，不留一点痕迹。
+
+#### StoreBackend
+
+从网络下载 Skills 文件并使用
+
+- **指定文件方式**： 
+
+  1. 使用 `store.put` 注入文件内容（键值对形式）到存储型后端：在物理层里存放一份真实的数据
+
+  2. `create_deep_agent` 中用 `skills` 参数指定技能目录路径：定义 Agent 的“视野范围”
+
+     > 告诉 Agent：“去你的仓库管理系统里查看以 `/skills/` 开头的所有记录，那些是你的技能。”
+
+  3. `create_deep_agent` 中传入这个 `store`
+
+- **Agent 是怎么找到技能的？**
+
+  1. **加载**： Agent 启动后，读取 `skills` 参数，知道自己需要寻找 `/skills/` 路径下的技能。
+  2. **寻址**： Agent 询问 `StoreBackend`：“我有 `/skills/` 路径下的东西吗？”
+  3. **转换**： `StoreBackend` 收到请求，它知道自己对接的是 `store`。它会自动加上 `("filesystem",)` 这个命名空间前缀，然后去 `store` 字典里查找。
+  4. **读取**： `store.get` 找到了你之前 `put` 进去的数据。
+  5. **注入**： 文件内容被提取出来。Agent 看到 `SKILL.md`，理解了里面的提示词，从而“学会”了如何调用相关工具。
+
+  ```py
+  from deepagents import create_deep_agent  
+  from deepagents.backends import StoreBackend  
+  from urllib.request import urlopen  # 导入urlopen，用于从网络下载远程文件
+  from deepagents.backends.utils import create_file_data  # 导入工具函数，将文本转为文件数据格式
+  from langgraph.store.memory import InMemoryStore  # 导入内存存储（模拟文件系统）
+  
+  # 创建一个内存存储对象（用于存储虚拟文件）
+  store = InMemoryStore()
+  
+  # 定义技能文件的远程地址（SKILL.md）
+  skill_url = "https://raw.githubusercontent.com/langchain-ai/deepagents/refs/heads/main/libs/cli/examples/skills/langgraph-docs/SKILL.md"
+  
+  # 从远程下载技能文件内容
+  with urlopen(skill_url) as response:  # 发起HTTP请求
+      skill_content = response.read().decode('utf-8')  # 读取并转成字符串
+  
+  # 将技能文件写入store中（模拟文件系统）
+  store.put(
+      namespace=("filesystem",),  # 命名空间（固定写法，表示文件系统）
+      key="/skills/langgraph-docs/SKILL.md",  # 文件路径（必须以/开头）
+      value=create_file_data(skill_content)  # 文件内容（包装成标准格式）
+  )
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model="openai:gpt-5.4",  
+      backend=StoreBackend(), 	# 指定后端类型使用StoreBackend
+      store=store,  				# 传入后端物理位置
+      skills=["/skills/"]  		# 指定技能目录（agent会扫描该目录下的SKILL.md）
+  )
+  
+  # 调用agent执行任务
+  result = agent.invoke(
+      {
+          "messages": [  # 输入对话
+              {
+                  "role": "user",  # 用户角色
+                  "content": "What is langgraph?",  # 提问内容
+              }
+          ]
+      },
+      config={
+          "configurable": {
+              "thread_id": "12345"  # 会话ID（用于区分不同对话上下文）
+          }
+      },
+  )
+  ```
+
+- 先建了一个图书馆（Store），然后告诉 Agent 如何通过管理员（StoreBackend）去借书（Skills）
+  - **使用存储后端（这里是内存型）**：一旦 Python 脚本停止，`store` 对象被销毁，所有的技能文件也随之消失。
+  - **没有 Checkpointer**：没有对话记忆
+
+#### FilesystemBackend
+
+- **人机参与**：[跳转](#人机参与)
+
+  ```py
+  from deepagents import create_deep_agent  
+  from langgraph.checkpoint.memory import MemorySaver  # 导入内存型checkpoint
+  from deepagents.backends.filesystem import FilesystemBackend  # 导入文件系统后端（直接操作本地文件）
+  
+  # 创建checkpoint对象（用于保存状态） 
+  checkpointer = MemorySaver()
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model="openai:gpt-5.4", 
+      backend=FilesystemBackend(root_dir="/Users/user/{project}"),  # 指定本地文件系统根目录（agent可读写这里）
+      skills=["/Users/user/{project}/skills/"],  # 指定技能目录（本地路径）
+      
+      # 设置哪些操作需要“人工确认”（human-in-the-loop） 
+      interrupt_on={
+          "write_file": True,   # 写文件需要人工确认（可批准 / 修改 / 拒绝）
+          "read_file": False,   # 读文件不需要中断（直接执行）
+          "edit_file": True     # 编辑文件需要人工确认
+      },
+      
+      checkpointer=checkpointer,  # 传入checkpoint
+  )
+  
+  # 调用agent执行任务
+  result = agent.invoke(
+      {
+          "messages": [  # 输入对话
+              {
+                  "role": "user",  # 用户角色
+                  "content": "What is langgraph?",  # 提问内容
+              }
+          ]
+      },
+      config={
+          "configurable": {
+              "thread_id": "12345"  # 会话ID（用于区分不同会话状态）
+          }
+      },
+  )
+  ```
+
+### `memory` 参数
+
+- **作用**：指定 “用户定义的上下文文件”，是<u>纯文本参考资料</u>（如 `.md`, `.txt`, `.json`）
+
+  - 它告诉 Agent：除了你的大脑（LLM）和你的工具（Skills），这里还有一些知识背景（关于当前任务背景、历史记录或特定实体信息的文件），你必须优先参考它们。
+
+  - **在哪里**：存在于 **Agent 后端 (Backend)**。如果没有显式指定 `backend`，它默认存在内存里的 `StateBackend`。
+
+  - **传递**：在 `create_deep_agent` 的 `memory` 参数中指定文件路径 + <u>在 `agent.invoke()` 中注入具体文件</u>
+
+    - `memory=["/AGENTS.md"]` 是 **“寻找指令”**（告诉它看哪）
+
+    - `invoke(files=...)` 是 **“实体供应”**（把东西给它），这是 <u>运行期注入</u>，仅对当前请求有效。
+
+      > 运行期注入：可以实现**动态上下文**，如每个用户的请求可能对应不同的文档（比如 A 用户问 A 订单，B 用户问 B 订单）、或你想要临时给 Agent 传递一些只对当前这轮对话有效的最新数据。
+
+#### **StateBackend**
+
+- **指定文件方式**：
+
+  1. `memory=["/AGENTS.md"]` ：定义 Agent 的“视野范围”，告诉它这里有参考资料
+  2. 运行时通过 `agent.invoke()` 注入具体文件：提供“物理实体”
+
+
+  ```py
+  from urllib.request import urlopen  
+  from deepagents import create_deep_agent  
+  from deepagents.backends.utils import create_file_data  
+  from langgraph.checkpoint.memory import MemorySaver  # 导入内存型checkpoint
+  
+  # 从远程下载AGENTS.md文件（作为memory文件）
+  with urlopen("https://raw.githubusercontent.com/langchain-ai/deepagents/refs/heads/main/examples/text-to-sql-agent/AGENTS.md") as response:  # 发起HTTP请求
+      agents_md = response.read().decode("utf-8")  # 读取并解码为字符串
+  
+  # 创建checkpoint对象
+  checkpointer = MemorySaver()
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model="openai:gpt-5.4", 
+      memory=[ # 指定memory文件路径（agent会把这些文件当作“长期记忆”使用）  
+          "/AGENTS.md"
+      ],
+      checkpointer=checkpointer,  # 传入checkpoint
+  )
+  
+  # 调用agent执行任务
+  result = agent.invoke(
+      {
+          "messages": [  # 输入对话
+              {
+                  "role": "user",  # 用户角色
+                  "content": "Please tell me what's in your memory files.",  # 让agent读取memory内容
+              }
+          ],
+          # 初始化虚拟文件系统（将AGENTS.md注入进去）  
+          "files": {
+              "/AGENTS.md": create_file_data(agents_md)  # 文件路径必须和memory中一致
+          },
+      },
+      config={
+          "configurable": {
+              "thread_id": "123456"  # 会话ID
+          }
+      },
+  )
+  ```
+
+#### StoreBackend
+
+- **指定文件方式**：
+
+  1. 使用 `store.put` 注入文件内容（键值对形式）到存储型后端：在物理层里存放一份真实的数据
+  2. `create_deep_agent` 中用 `memory` 参数指定目录路径：定义 Agent 的“视野范围”
+  3. `create_deep_agent` 中传入这个 `store`
+
+  ```py
+  from urllib.request import urlopen  
+  from deepagents import create_deep_agent 
+  from deepagents.backends import StoreBackend  
+  from deepagents.backends.utils import create_file_data 
+  from langgraph.store.memory import InMemoryStore  # 导入内存存储
+  
+  # 从远程下载AGENTS.md文件内容（作为memory文件）
+  with urlopen("https://raw.githubusercontent.com/langchain-ai/deepagents/refs/heads/main/examples/text-to-sql-agent/AGENTS.md") as response:  # 发起HTTP请求
+      agents_md = response.read().decode("utf-8")  # 读取并解码为字符串
+  
+  # 创建内存存储【文件存储位置】
+  store = InMemoryStore()
+  
+  # 将文本内容转换为标准文件数据格式 
+  file_data = create_file_data(agents_md)
+  
+  # 将文件写入store中（模拟文件系统）
+  store.put(
+      namespace=("filesystem",),  # 命名空间，表示文件系统（固定写法）
+      key="/AGENTS.md",  # 文件路径（必须与memory配置一致）
+      value=file_data  # 文件内容
+  )
+  
+  # 创建agent
+  agent = create_deep_agent(
+      model="openai:gpt-5.4",  
+      backend=StoreBackend(),  # 使用StoreBackend，从store中读取文件
+      store=store,  # 传入存储对象
+      # 指定memory文件路径（agent会把它当作长期记忆） 
+      memory=[
+          "/AGENTS.md"
+      ]
+  )
+  
+  # 调用agent执行任务
+  result = agent.invoke(
+      {
+          "messages": [  # 输入对话
+              {
+                  "role": "user",  # 用户角色
+                  "content": "Please tell me what's in your memory files.",  # 让agent读取memory内容
+              }
+          ],
+          # 初始化虚拟文件系统（再次注入文件，确保可访问） 
+          "files": {
+              "/AGENTS.md": create_file_data(agents_md)  # 路径必须与memory一致
+          },
+      },
+      config={
+          "configurable": {
+              "thread_id": "12345"  # 会话ID（用于区分不同上下文）
+          }
+      },
+  )
+  ```
+
+#### FilesystemBackend
+
+- **人机参与**：[跳转](#人机参与)
+
+  ```py
+  from deepagents import create_deep_agent
+  from deepagents.backends import FilesystemBackend
+  from langgraph.checkpoint.memory import MemorySaver
+  
+  checkpointer = MemorySaver()
+  
+  agent = create_deep_agent(
+      model="openai:gpt-5.4",
+      backend=FilesystemBackend(root_dir="/Users/user/{project}"),
+      memory=[
+          "./AGENTS.md"
+      ],
+      interrupt_on={
+          "write_file": True,  # Default: approve, edit, reject
+          "read_file": False,  # No interrupts needed
+          "edit_file": True    # Default: approve, edit, reject
+      },
+      checkpointer=checkpointer,  # Required!
+  )
+  ```
+
+
+
 ## 其他
 
-### 多智能体协作 (Multi-Agent Systems)
+### <a name="人机参与">人机参与</a>
 
-- **内容**：如何让两个 Agent 对话？一个负责写代码，一个负责审代码。
-- **核心**：**Hand-off (移交控制权)**。
+- 有些工具操作可能比较敏感，需要人工批准才能执行。您可以为每个工具配置审批：
 
-### 7. 评估与调试 (Evaluation & Observability)
+  可以在工具调用时为代理和子代理配置中断，也可以在工具调用内部设置。
 
-- **内容**：如何监控 Agent 的思考路径？如果它回答错了，是哪一步错了？
-- **工具**：LangSmith 等可视化工具。
+  ```py
+  from langchain.tools import tool
+  from deepagents import create_deep_agent
+  from langgraph.checkpoint.memory import MemorySaver
+  
+  @tool
+  def delete_file(path: str) -> str:
+      """Delete a file from the filesystem."""
+      return f"Deleted {path}"
+  
+  @tool
+  def read_file(path: str) -> str:
+      """Read a file from the filesystem."""
+      return f"Contents of {path}"
+  
+  @tool
+  def send_email(to: str, subject: str, body: str) -> str:
+      """Send an email."""
+      return f"Sent email to {to}"
+  
+  # Checkpointer is REQUIRED for human-in-the-loop
+  checkpointer = MemorySaver()
+  
+  agent = create_deep_agent(
+      model="claude-sonnet-4-6",
+      tools=[delete_file, read_file, send_email],
+      interrupt_on={
+          "delete_file": True,  # Default: approve, edit, reject
+          "read_file": False,   # No interrupts needed
+          "send_email": {"allowed_decisions": ["approve", "reject"]},  # No editing
+      },
+      checkpointer=checkpointer  # Required!
+  )
+  ```
 
-### 8. 生产级优化
+### 结构化输出
 
-- **内容**：流式输出 (Streaming)、并发处理、成本控制。
+使用 `create_deep_agent()` 的 `response_format` 参数。
 
+```py
+import os 
+from deepagents import create_deep_agent  
+from typing import Literal  # 导入Literal类型，用于限制参数只能取固定值
+from pydantic import BaseModel, Field  # 导入Pydantic，用于定义结构化数据模型
+from tavily import TavilyClient  # 导入Tavily客户端（用于联网搜索）
 
+# 创建Tavily客户端，从环境变量中读取API Key 【联网搜索能力】
+tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 
-
-
-
-
-## Demo
-
-- **天气 + 新闻 智能体**
-
-  - **环境**： `pip install deepagents langchain_openai`
-
-  - **示例**
-
-    ```py
-    from deepagents import create_deep_agent
-    from langchain_core.tools import tool #用于把一个普通函数“注册”为工具（给 agent用）
+# 定义一个工具函数：用于执行互联网搜索 【提供给agent的tool】
+def internet_search(
+    query: str,  # 搜索关键词（必须参数）
+    max_results: int = 5,  # 最大返回结果数量（默认5）
+    topic: Literal["general", "news", "finance"] = "general",  # 搜索主题（限制取值范围）
+    include_raw_content: bool = False,  # 是否返回原始网页内容（默认不返回）
+):
+    """Run a web search"""  # 工具说明（agent会看到这个描述）
     
-    # 1. 定义天气工具
-    @tool # 使用 @tool 装饰器，把这个函数注册为一个工具
-    def get_weather(city: str) -> str:
-        """获取指定城市的实时天气。"""
-        # 实际开发中这里会接入 OpenWeather API
-        return f"{city}今天晴转多云，25°C。"
-    
-    # 2. 定义新闻工具
-    @tool
-    def search_news(topic: str) -> str:
-        """搜索关于某个话题的最新新闻。"""
-        # 实际开发中这里会接入 Tavily 或 DuckDuckGo
-        return f"关于 {topic} 的最新头条：AI Agent 框架 DeepAgents 正式发布！"
-    
-    # 3. 创建 Deep Agent (核心区别在于这个方法)
-    # 它会自动为你构建 Planning（规划）和 Reflection（反思）节点
-    agent = create_deep_agent(
-        model="openai:gpt-4o",  # 或 "claude-3-5-sonnet"
-        tools=[get_weather, search_news],
-        system_prompt="你是一个高效的个人助理，负责通过工具获取信息并总结。"
+    # 调用Tavily搜索接口，并传入参数
+    return tavily_client.search(
+        query,  # 搜索关键词
+        max_results=max_results,  # 返回结果数量
+        include_raw_content=include_raw_content,  # 是否包含原始内容
+        topic=topic,  # 搜索主题
     )
-    
-    # 4. 运行并查看逻辑
-    response = agent.invoke({
-        "messages": [{"role": "user", "content": "帮我查一下上海的天气，并搜一下今天关于 DeepAgents 的新闻。"}]
-    })
-    
-    print(response["messages"][-1].content)
-    ```
 
-  - 这个 Agent 到底是怎么 run 起来的？——**DeepAgents 的“执行图 (Execution Graph)”**。
+# 定义一个结构化输出模型（天气报告） 【约束agent输出格式】
+class WeatherReport(BaseModel):
+    """A structured weather report with current conditions and forecast."""
+    location: str = Field(description="The location for this weather report")  
+    temperature: float = Field(description="Current temperature in Celsius") 
+    condition: str = Field(description="Current weather condition (e.g., sunny, cloudy, rainy)")  
+    humidity: int = Field(description="Humidity percentage")  
+    wind_speed: float = Field(description="Wind speed in km/h")
+    forecast: str = Field(description="Brief forecast for the next 24 hours")  
 
-    与普通 LangChain Agent 不同，DeepAgents 的内部是一个由 **LangGraph** 驱动的状态机。你可以尝试在代码里加上这一行来观察它的结构：
+# 创建agent
+agent = create_deep_agent(
+    model="openai:gpt-5.4",  # 指定使用的模型
+    response_format=WeatherReport,  # 指定输出必须符合WeatherReport结构 【结构化输出】
+    tools=[internet_search]  # 注册工具（agent可以调用internet_search进行搜索）
+)
 
-    ```py
-    # 打印执行图的节点，看看它比起普通 Agent 多了哪些步骤
-    print(agent.get_graph().nodes.keys())
-    ```
+# 调用agent执行任务
+result = agent.invoke({
+    "messages": [{  # 输入对话
+        "role": "user",  # 用户角色
+        "content": "What's the weather like in San Francisco?"  # 提问天气
+    }]
+})
 
-    你会发现它不仅仅有 `call_model` 和 `call_tools`，通常还包含：
-
-    1. **Planning (规划层)**：它接收到用户指令后，会先生成一个“任务清单”（Todo List），决定先查天气还是先搜新闻。
-    2. **State Management (状态层)**：它会把天气结果存入“短期记忆”，供搜索新闻时参考（例如：如果天气不好，它可能会在搜新闻时自动增加“暴雨预警”的搜索项）。
-    3. **Reflection (反思层)**：在给用户最终答案前，它会自我检查：“我查到的天气和新闻完整吗？有没有遗漏？”
-
-  -  建议你在跑通代码后，重点研究以下三点：
-    1. **观察日志 (Tracing)**：使用 **LangSmith**（LangChain 的可视化工具）观察。你会看到 DeepAgents 在后台会进行多次 LLM 调用，甚至会有自己跟自己对话（规划步骤）的过程。
-    2. **研究“中介软件 (Middleware)”**：DeepAgents 的一大特色是支持 Middleware。你可以尝试写一个简单的 Middleware，在工具被调用前打印一条 Log，这样你就理解了它在执行流程中是如何拦截信息的。
-    3. **对比实验**：你可以尝试用普通的 `create_react_agent` (LangChain 原生) 和 `create_deep_agent` 处理同一个复杂问题。你会发现 DeepAgents 在处理“先做什么、后做什么”的逻辑上要聪明得多。
-
-
+# 打印结构化结果（Pydantic对象）
+print(result["structured_response"])  # 输出WeatherReport对象（字段已解析）
+# 示例输出：
+# location='San Francisco, California' temperature=18.3 condition='Sunny' humidity=48 wind_speed=7.6 forecast='...'
+```
 
