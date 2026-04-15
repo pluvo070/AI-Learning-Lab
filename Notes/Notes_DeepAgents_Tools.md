@@ -26,7 +26,24 @@
   
 - **==Skills==（SKILL.md）**：是**自然语言描述**。它是给 Agent 看的“说明书”，告诉它“什么时候”该去用工具，以及用的“策略”是什么。
 
+- **==项目结构==**
 
+  ```
+  my_agent_project/
+  ├── data/               # 原始文档 (PDF, TXT)
+  ├── chroma_db/          # 向量数据库存储目录 (自动生成)
+  ├── tools/              # 所有的工具脚本
+  │   ├── search_tool.py  
+  │   ├── rag_tool.py     
+  │   └── weather_tool.py 
+  ├── skills/             # 所有的Markdown文档
+  │   ├── weather_expert.md
+  │   └── finance_expert.md
+  ├── ingest.py           # 知识入库脚本 (用于生成 chroma_db)
+  └── main.py             # 启动文件 (组合 Skill 和 Tool)
+  ```
+
+  
 
 ### 1. Tavily（联网搜索）
 
